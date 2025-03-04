@@ -87,7 +87,6 @@ public class Grabbable : MonoBehaviour, Interactable
         shadow.parent = hand;
         initialXPos = transform.localPosition.x;
         initialYPos = transform.localPosition.y;
-        bc.contactCaptureLayers &= ~(0x1 << 3);
         pc.SetIsHolding(true);
         pc.SetGrabbedObj(this);
 
@@ -102,7 +101,6 @@ public class Grabbable : MonoBehaviour, Interactable
         body.GetComponent<SpriteRenderer>().sortingOrder = 1;
         yield return new WaitForEndOfFrame();
         transform.parent = null;
-        bc.contactCaptureLayers |= 0x1 << 3;
         fakeHeight.Launch(pc.GetLastInput() * groundVelocity, verticalVelocity);
         yield return new WaitForEndOfFrame();
         justDropped = true;
