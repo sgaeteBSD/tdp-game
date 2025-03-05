@@ -277,7 +277,7 @@ public class PlayerController : MonoBehaviour
     public IEnumerator Respawn()
     {
         jumpBufferCounter = 0f;
-        transform.position = new Vector2(-4, 0);
+        transform.position = new Vector2(0, 0); //todo: respawn based on room
         GameObject.FindGameObjectWithTag("PlayerSprite").transform.localScale = new Vector3(1, 1, 0);
         yield return new WaitForSeconds(0.1f);
         allowInputs = true;
