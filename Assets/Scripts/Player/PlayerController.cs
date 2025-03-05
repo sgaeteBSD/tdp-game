@@ -21,12 +21,12 @@ public class PlayerController : MonoBehaviour
     public bool dashing = false;
     public bool endDash = false;
     public bool takingDamage = false;
-    
+
     public Vector2 moveInput;
 
     [SerializeField] public ContactFilter2D groundedFilter;
     private bool isCharacterGrounded => rb.IsTouching(groundedFilter);
-    
+
     private SquashNStretch sns;
     private Vector2 offset;
     public bool hasFallen = false;
@@ -40,7 +40,7 @@ public class PlayerController : MonoBehaviour
     private Grabbable grabbedObj;
 
     [SerializeField] private bool isHoldingObj = false;
-    
+
     // Start is called before the first frame update
     void Start()
     {
@@ -58,44 +58,49 @@ public class PlayerController : MonoBehaviour
         {
             MiscInputs();
             MoveInput();
-            if (!isHoldingObj) 
+            if (!isHoldingObj)
             {
                 JumpInput();
-                DashInput();   
+                DashInput();
             }
         }
         CheckIfFalling(false);
     }
-    
+
     void FixedUpdate()
     {
         Move();
         FinishDash();
     }
 
-    void MiscInputs() {
+    void MiscInputs()
+    {
         if (moveInput != Vector2.zero)
         {
             lastMoveInput = moveInput;
         }
-        if (Input.GetButtonDown("Submit")) {
-            if (!isHoldingObj) {
+        if (Input.GetButtonDown("Submit"))
+        {
+            if (!isHoldingObj)
+            {
                 Interact();
             }
-            else {
-                if (!grabbedObj.IsDroppable()) {
+            else
+            {
+                if (!grabbedObj.IsDroppable())
+                {
                     return;
                 }
                 StartCoroutine(grabbedObj.Drop(5, 5));
                 sfx.Drop();
             }
         }
-        if (isHoldingObj && !grabbedObj.IsGrabAnimOn() && Input.GetButtonDown("Jump") && grabbedObj.IsDroppable()) 
+        if (isHoldingObj && !grabbedObj.IsGrabAnimOn() && Input.GetButtonDown("Jump") && grabbedObj.IsDroppable())
         {
             StartCoroutine(grabbedObj.Drop(5, 5));
             sfx.Drop();
         }
-        if (isHoldingObj && !grabbedObj.IsGrabAnimOn() && Input.GetButtonDown("Dash") && grabbedObj.IsDroppable()) 
+        if (isHoldingObj && !grabbedObj.IsGrabAnimOn() && Input.GetButtonDown("Dash") && grabbedObj.IsDroppable())
         {
             StartCoroutine(grabbedObj.Drop(12.5f, 12.5f));
             sfx.Throw();
@@ -181,7 +186,7 @@ public class PlayerController : MonoBehaviour
             fakeHeight.Launch(Vector2.zero, jumpVelocity);
         }
     }
-    
+
     void DashInput()
     {
         if (Input.GetButtonDown("Dash") && !dashing)
@@ -230,9 +235,10 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    void Interact() 
+    void Interact()
     {
-        if (canInteract && interactedObj != null) {
+        if (canInteract && interactedObj != null)
+        {
             interactedObj.Interact();
         }
     }
@@ -272,7 +278,7 @@ public class PlayerController : MonoBehaviour
     {
         jumpBufferCounter = 0f;
         transform.position = new Vector2(-4, 0);
-        GameObject.FindGameObjectWithTag("PlayerSprite").transform.localScale = new Vector3(1, 1, 0); 
+        GameObject.FindGameObjectWithTag("PlayerSprite").transform.localScale = new Vector3(1, 1, 0);
         yield return new WaitForSeconds(0.1f);
         allowInputs = true;
         hasFallen = false;
@@ -288,16 +294,16 @@ public class PlayerController : MonoBehaviour
         {
             ObstacleDamage(other.gameObject);
         }
-        if (other.gameObject.CompareTag("Interactable")) 
+        if (other.gameObject.CompareTag("Interactable"))
         {
             canInteract = true;
             interactedObj = other.gameObject.GetComponent<Interactable>();
         }
     }
 
-    private void OnTriggerExit2D(Collider2D other) 
+    private void OnTriggerExit2D(Collider2D other)
     {
-        if (other.gameObject.CompareTag("Interactable")) 
+        if (other.gameObject.CompareTag("Interactable"))
         {
             canInteract = false;
             interactedObj = null;
@@ -314,7 +320,7 @@ public class PlayerController : MonoBehaviour
         obstacle.GetComponent<Obstacle>().Knockback();
         StartCoroutine("TakingDamage");
     }
-    
+
     IEnumerator TakingDamage()
     {
         takingDamage = true;
@@ -329,19 +335,22 @@ public class PlayerController : MonoBehaviour
         return lastMoveInput;
     }
 
-    public void SetIsHolding(bool isHoldingObj) {
+    public void SetIsHolding(bool isHoldingObj)
+    {
         this.isHoldingObj = isHoldingObj;
-        if (isHoldingObj) {
+        if (isHoldingObj)
+        {
             sfx.Grab();
         }
     }
 
-    public void SetGrabbedObj(Grabbable grabbedObj) 
+    public void SetGrabbedObj(Grabbable grabbedObj)
     {
         this.grabbedObj = grabbedObj;
     }
 
-    public Grabbable GetGrabbedObj() {
+    public Grabbable GetGrabbedObj()
+    {
         return grabbedObj;
     }
 }

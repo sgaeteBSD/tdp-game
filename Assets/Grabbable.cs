@@ -27,7 +27,7 @@ public class Grabbable : MonoBehaviour, Interactable
 
     private float initialShadowYPos;
     private Vector3 finalShadowPos;
-    
+
     SquashNStretch sns;
     FakeHeight fakeHeight;
     private bool animPlaying = false;
@@ -38,6 +38,7 @@ public class Grabbable : MonoBehaviour, Interactable
     // Start is called before the first frame update
     void Start()
     {
+
         pc = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerController>();
         rb = GetComponent<Rigidbody2D>();
         bc = GetComponent<BoxCollider2D>();
@@ -47,39 +48,45 @@ public class Grabbable : MonoBehaviour, Interactable
         rb.isKinematic = true;
         rb.freezeRotation = true;
         rb.gravityScale = 0f;
+        bc.isTrigger = true;
     }
 
     // Update is called once per frame
     void Update()
     {
 
-        if (CheckIfGrabbed() && animPlaying) {
+        if (CheckIfGrabbed() && animPlaying)
+        {
             SetShadow();
         }
 
-        bc.isTrigger = CheckIfGrabbed() || !IsGrounded() ? true : false;
 
-        if (IsGrounded() && shadow.transform.localPosition.y != -0.4f && !CheckIfGrabbed()) {
+        if (IsGrounded() && shadow.transform.localPosition.y != -0.4f && !CheckIfGrabbed())
+        {
             shadow.transform.localPosition = new Vector3(shadow.transform.localPosition.x, -0.4f, shadow.transform.localPosition.z);
         }
 
-        if (IsGrabbable() && body.GetComponent<SpriteRenderer>().sortingOrder == 1) {
+        if (IsGrabbable() && body.GetComponent<SpriteRenderer>().sortingOrder == 1)
+        {
             body.GetComponent<SpriteRenderer>().sortingOrder = 0;
         }
     }
 
     public void Interact()
     {
-        if (IsGrabbable()) {
+        if (IsGrabbable())
+        {
             Grab();
         }
     }
 
-    public bool IsGrabbable() {
+    public bool IsGrabbable()
+    {
         return IsGrounded() && !CheckIfGrabbed() && !justDropped;
     }
 
-    void Grab() {
+    void Grab()
+    {
         Transform hand = GameObject.FindGameObjectWithTag("PlayerHand").transform;
         initialShadowYPos = shadow.localPosition.y;
         finalShadowPos = new Vector3(0, -(hand.localPosition.y + Mathf.Abs(initialShadowYPos)), 0f);
@@ -87,20 +94,23 @@ public class Grabbable : MonoBehaviour, Interactable
         shadow.parent = hand;
         initialXPos = transform.localPosition.x;
         initialYPos = transform.localPosition.y;
+        //bc.contactCaptureLayers &= ~(0x1 << 3);
         pc.SetIsHolding(true);
         pc.SetGrabbedObj(this);
 
         animationDuration = Mathf.Clamp(Vector2.Distance(new Vector2(0, 0), transform.localPosition), 0f, 2f) * 0.175f;
         sns.animationDuration = Mathf.Lerp(0.1f, 0.25f, animationDuration / 0.45f);
         sns.maximumScale = Mathf.Lerp(0.8f, 0.6f, animationDuration / 0.35f);
-        
+
         StartCoroutine("GrabAnim");
     }
 
-    public IEnumerator Drop(float groundVelocity, float verticalVelocity) {
+    public IEnumerator Drop(float groundVelocity, float verticalVelocity)
+    {
         body.GetComponent<SpriteRenderer>().sortingOrder = 1;
         yield return new WaitForEndOfFrame();
         transform.parent = null;
+        //bc.contactCaptureLayers |= 0x1 << 3;
         fakeHeight.Launch(pc.GetLastInput() * groundVelocity, verticalVelocity);
         yield return new WaitForEndOfFrame();
         justDropped = true;
@@ -110,47 +120,52 @@ public class Grabbable : MonoBehaviour, Interactable
         justDropped = false;
     }
 
-    public IEnumerator PickupCooldown() {
+    public IEnumerator PickupCooldown()
+    {
         justDropped = true;
         yield return new WaitForEndOfFrame();
         justDropped = false;
     }
 
-    bool CheckIfGrabbed() {
+    bool CheckIfGrabbed()
+    {
         return pc.GetGrabbedObj() == this;
     }
 
     Vector3 z = Vector3.zero;
-    void SetShadow() 
+    void SetShadow()
     {
         shadow.transform.localPosition = Vector3.SmoothDamp(shadow.transform.localPosition, finalShadowPos, ref z, 0.05f);
     }
 
-    private IEnumerator GrabAnim() {
+    private IEnumerator GrabAnim()
+    {
         isDroppable = false;
         float elapsedTime = 0;
-        Vector3 initialPos = new Vector3(initialXPos, initialYPos, 0); 
+        Vector3 initialPos = new Vector3(initialXPos, initialYPos, 0);
         Vector3 finalPos = initialPos;
 
         float yDirFromPlayer = Mathf.Sign(initialYPos + transform.parent.localPosition.y);
 
         bool snsPlayed = false;
 
-        while (elapsedTime < animationDuration) {
+        while (elapsedTime < animationDuration)
+        {
             animPlaying = true;
             elapsedTime += Time.deltaTime;
-            
+
             float curvePos = elapsedTime / animationDuration;
             float xCurveValue = grabAnimX.Evaluate(curvePos);
             float yCurveValue = grabAnimY.Evaluate(curvePos);
-            
+
             float xRemappedValue = initialXPos + (xCurveValue * (finalXPos - initialXPos));
             float yRemappedValue = initialYPos + (yCurveValue * (finalYPos - initialYPos));
 
             float newXPos = Mathf.Abs(initialPos.x * xRemappedValue) > Mathf.Abs(initialXPos) ? initialXPos : initialPos.x * xRemappedValue * Mathf.Sign(initialXPos);
             float newYPos = Mathf.Abs(initialPos.y * yRemappedValue) > Mathf.Abs(initialYPos) ? initialYPos : initialPos.y * yRemappedValue * Mathf.Sign(initialYPos);
 
-            if (yDirFromPlayer < 0 && initialPos.y * yRemappedValue * Mathf.Sign(initialYPos) > initialYPos) {
+            if (yDirFromPlayer < 0 && initialPos.y * yRemappedValue * Mathf.Sign(initialYPos) > initialYPos)
+            {
                 newYPos = initialPos.y * yRemappedValue * Mathf.Sign(initialYPos);
             }
 
@@ -159,7 +174,8 @@ public class Grabbable : MonoBehaviour, Interactable
             transform.localPosition = finalPos;
             shadow.transform.localPosition = new Vector3(finalPos.x, shadow.transform.localPosition.y, 0);
 
-            if (elapsedTime / animationDuration > 0.8f && !snsPlayed) {
+            if (elapsedTime / animationDuration > 0.8f && !snsPlayed)
+            {
                 sns.PlaySquashAndStretch();
                 snsPlayed = false;
             }
@@ -174,19 +190,23 @@ public class Grabbable : MonoBehaviour, Interactable
         isDroppable = true;
     }
 
-    public bool IsGrabAnimOn() {
+    public bool IsGrabAnimOn()
+    {
         return animPlaying;
     }
 
-    public bool IsGrounded() {
+    public bool IsGrounded()
+    {
         return fakeHeight.isGrounded;
     }
 
-    public bool IsDroppable() {
+    public bool IsDroppable()
+    {
         return isDroppable;
     }
 
-    public Vector3 GetShadowPos() {
+    public Vector3 GetShadowPos()
+    {
         return new Vector3(0, initialShadowYPos, 0);
     }
 }
