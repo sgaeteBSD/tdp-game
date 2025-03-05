@@ -3,13 +3,14 @@ using UnityEngine;
 
 public class RoomGenerator : MonoBehaviour
 {
-    public GameObject[] roomPrefabs; //assign room prefabs here
+    public GameObject[] roomPrefabs; // Assign room prefabs here
     public int level = 1;
     private int gridSize = 7;
     private int totalRooms;
-    private Vector2Int center = new Vector2Int(3, 3);
-    private HashSet<Vector2Int> placedRooms = new HashSet<Vector2Int>();
-    private List<Vector2Int> deadEnds = new List<Vector2Int>();
+    public Vector2Int center = new Vector2Int(3, 3);
+    public HashSet<Vector2Int> placedRooms = new HashSet<Vector2Int>();
+    public List<Vector2Int> deadEnds = new List<Vector2Int>();
+
     void Start()
     {
         GenerateRooms();
@@ -78,7 +79,7 @@ public class RoomGenerator : MonoBehaviour
 
     void PopulateRooms()
     {
-        Vector2Int worldOffset = new Vector2Int(center.x * 26, center.y * 16); //shift center to (0,0)
+        Vector2 worldOffset = new Vector2(center.x * 26, center.y * 16); // Shift center to (0,0)
 
         foreach (var roomPos in placedRooms)
         {
@@ -95,5 +96,4 @@ public class RoomGenerator : MonoBehaviour
             (list[i], list[j]) = (list[j], list[i]);
         }
     }
-
 }
